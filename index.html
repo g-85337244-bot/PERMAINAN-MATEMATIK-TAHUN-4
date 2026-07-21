@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Escape Room Matematik: Operasi Menyelamatkan Kota Matematik</title>
+  <style>
+    /* ==========================================================================
+       1. REKA BENTUK UTAMA & PEMBOLEHUBAH WARNA (FUTURISTIC NEON THEME)
+       ========================================================================== */
+    :root {
+      --cyan-neon: #00f3ff;
+      --green-neon: #39ff14;
+      --red-neon: #ff0055;
+      --yellow-neon: #ffe600;
+      --dark-bg: #030712;
+      --panel-bg: rgba(10, 20, 38, 0.92);
+      --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      font-family: var(--font-main);
+    }
+
+    body {
+      background-color: var(--dark-bg);
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    #game-container {
+      position: relative;
+      width: 1280px;
+      height: 720px;
+      max-width: 100vw;
+      max-height: 100vh;
+      aspect-ratio: 16 / 9;
+      background: #01040a;
+      box-shadow: 0 0 50px rgba(0, 243, 255, 0.25);
+      border: 2px solid var(--cyan-neon);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    .hidden { display: none !important; }
+
+    /* ==========================================================================
+       2. ANIMASI CSS (SHAKE, PULSE, GLOW, CONFETTI)
+       ========================================================================== */
+    .shake {
+      animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+    }
+
+    @keyframes shake {
+      10%, 90% { transform: translate3d(-4px, 0, 0); }
+      20%, 80% { transform: translate3d(6px, 0, 0); }
+      30%, 50%, 70% { transform: translate3d(-10px, 0, 0); }
+      40%, 60% { transform: translate3d(10px, 0, 0); }
+    }
+
+    @keyframes pulseGlow {
+      from { box-shadow: 0 0 10px var(--cyan-neon); }
+      to { box-shadow: 0 0 25px var(--cyan-neon), 0 0 5px #fff; }
+    }
+
+    @keyframes alarmGlow {
+      from { box-shadow: 0 0 10px var(--red-neon); border-color: var(--red-neon); }
+      to { box-shadow: 0 0 30px var(--red-neon); border-color: #fff; }
+    }
+
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      z-index: 99;
+      pointer-events: none;
+      animation: fall 3s linear infinite;
+    }
+
+    @keyframes fall {
+      0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(730px) rotate(360deg); opacity: 0; }
+    }
+
+    /* ==========================================================================
+       3. ANTARAMUKA SKRIN & MODAL (OVERLAY)
+       ========================================================================== */
+    .overlay {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(2, 6, 18, 0.92);
+      backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 20;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .modal-card {
+      background: var(--panel-bg);
+      border: 2px solid var(--cyan-neon);
+      box-shadow: 0 0 30px rgba(0, 243, 255, 0.3);
+      border-radius: 16px;
+      padding: 30px 40px;
+      max-width: 560px;
+      width: 90%;
+      position: relative;
+    }
+
+    .logo-badge {
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      color: var(--yellow-neon);
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+
+    h1 {
+      font-size: 26px;
+      color: var(--cyan-neon);
+      text-shadow: 0 0 12px var(--cyan-neon);
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+    }
+
+    h2 {
+      font-size: 16px;
+      color: #a0aec0;
+      margin-bottom: 25px;
+      font-weight: 500;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+      text-align: left;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: var(--cyan-neon);
+      margin-bottom: 6px;
+      letter-spacing: 1px;
+      font-weight: bold;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 12px 16px;
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(0, 243, 255, 0.4);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 16px;
+      outline: none;
+      transition: all 0.3s;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--cyan-neon);
+      box-shadow: 0 0 12px rgba(0, 243, 255, 0.5);
+    }
+
+    .btn-action {
+      margin-top: 10px;
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, var(--green-neon), #009933);
+      border: none;
+      border-radius: 8px;
+      color: #000;
+      font-weight: 900;
+      font-size: 18px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      box-shadow: 0 0 20px rgba(57, 255, 20, 0.4);
+      transition: all 0.2s;
+    }
+
+    .btn-action:hover {
+      transform: scale(1.02);
+      box-shadow: 0 0 30px rgba(57, 255, 20, 0.8);
+    }
+
+    /* Access Granted Splash Text */
+    #splash-text {
+      position: absolute;
+      font-size: 48px;
+      font-weight: 900;
+      color: var(--green-neon);
+      text-shadow: 0 0 20px var(--green-neon);
+      letter-spacing: 4px;
+      z-index: 30;
+      pointer-events: none;
+    }
+
+    /* ==========================================================================
+       4. PAPARAN ATAS (HUD BAR & PROGRESS)
+       ========================================================================== */
+    #top-hud {
+      position: absolute;
+      top: 15px;
+      left: 20px;
+      right: 20px;
+      height: 70px;
+      background: var(--panel-bg);
+      border: 1px solid var(--cyan-neon);
+      border-radius: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 20px;
+      z-index: 10;
+      box-shadow: 0 0 20px rgba(0, 243, 255, 0.15);
+    }
+
+    .hud-group {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .hud-box {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .hud-label {
+      color: #718096;
+      font-size: 10px;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+
+    .hud-val {
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 15px;
+    }
+
+    .badge-diff {
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .diff-1 { background: rgba(57, 255, 20, 0.15); border: 1px solid var(--green-neon); color: var(--green-neon); }
+    .diff-2 { background: rgba(255, 230, 0, 0.15); border: 1px solid var(--yellow-neon); color: var(--yellow-neon); }
+    .diff-3 { background: rgba(255, 0, 85, 0.15); border: 1px solid var(--red-neon); color: var(--red-neon); }
+
+    /* Progress Bar */
+    .progress-wrapper {
+      width: 140px;
+      height: 10px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 5px;
+      overflow: hidden;
+      border: 1px solid rgba(0,243,255,0.3);
+      margin-top: 4px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--cyan-neon), var(--green-neon));
+      transition: width 0.3s;
+    }
+
+    /* Digital Timer Circular/Box */
+    #timer-box {
+      width: 55px;
+      height: 55px;
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.8);
+      border: 2px solid var(--cyan-neon);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 24px;
+      font-weight: 900;
+      color: var(--cyan-neon);
+      box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
+    }
+
+    #timer-box.warning {
+      animation: alarmGlow 0.5s infinite alternate;
+      color: var(--red-neon);
+    }
+
+    /* ==========================================================================
+       5. PANEL SOALAN MATEMATIK & OPTION BUTTONS
+       ========================================================================== */
+    #question-panel {
+      position: absolute;
+      bottom: 25px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 820px;
+      max-width: 92%;
+      background: var(--panel-bg);
+      border: 2px solid var(--cyan-neon);
+      border-radius: 16px;
+      padding: 20px 30px;
+      z-index: 10;
+      box-shadow: 0 0 35px rgba(0, 0, 0, 0.9);
+      text-align: center;
+    }
+
+    .q-title {
+      font-size: 13px;
+      color: var(--cyan-neon);
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    .q-text {
+      font-size: 42px;
+      font-weight: 900;
+      color: #ffffff;
+      letter-spacing: 3px;
+      text-shadow: 0 0 15px var(--cyan-neon);
+      margin-bottom: 20px;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(0, 243, 255, 0.3);
+    }
+
+    .answers-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .btn-ans {
+      background: rgba(8, 20, 40, 0.95);
+      border: 1px solid var(--cyan-neon);
+      border-radius: 10px;
+      color: #ffffff;
+      padding: 16px;
+      font-size: 22px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      padding-left: 20px;
+      box-shadow: inset 0 0 10px rgba(0, 243, 255, 0.1);
+    }
+
+    .btn-ans:hover {
+      background: rgba(0, 243, 255, 0.25);
+      transform: translateY(-2px);
+      box-shadow: 0 0 20px rgba(0, 243, 255, 0.4);
+    }
+
+    .btn-ans .key-tag {
+      background: var(--cyan-neon);
+      color: #000;
+      padding: 3px 10px;
+      border-radius: 6px;
+      margin-right: 18px;
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    /* ==========================================================================
+       6. RANKING TABLE (TOP 10)
+       ========================================================================== */
+    .ranking-container {
+      max-height: 200px;
+      overflow-y: auto;
+      margin: 15px 0;
+      border: 1px solid rgba(0, 243, 255, 0.2);
+      border-radius: 8px;
+    }
+
+    .ranking-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .ranking-table th {
+      background: rgba(0, 243, 255, 0.1);
+      color: var(--cyan-neon);
+      padding: 8px;
+      text-align: left;
+      position: sticky;
+      top: 0;
+    }
+
+    .ranking-table td {
+      padding: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      text-align: left;
+    }
+
+    /* Custom Scrollbar */
+    .ranking-container::-webkit-scrollbar { width: 6px; }
+    .ranking-container::-webkit-scrollbar-thumb { background: var(--cyan-neon); border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+<div id="game-container">
+  <!-- Kanvas Latar Belakang Digital Escape Room -->
+  <canvas id="bgCanvas" width="1280" height="720"></canvas>
+
+  <!-- Splash Animation Text -->
+  <div id="splash-text" class="hidden">ACCESS GRANTED</div>
+
+  <!-- PAPARAN ATAS (HUD) -->
+  <div id="top-hud" class="hidden">
+    <div class="hud-group">
+      <div class="hud-box">
+        <span class="hud-label">AGEN PERTAHANAN</span>
+        <span class="hud-val" id="hud-name">Player</span>
+      </div>
+      <div class="hud-box">
+        <span class="hud-label">SEKOLAH</span>
+        <span class="hud-val" id="hud-school">School</span>
+      </div>
+    </div>
+
+    <div class="hud-group">
+      <div class="hud-box" style="align-items: center;">
+        <span class="hud-label">SEKTOR PINTU</span>
+        <span id="hud-diff" class="badge-diff diff-1">TAHAP 1: RENDAH</span>
+      </div>
+      <div class="hud-box" style="align-items: center;">
+        <span class="hud-label">KEMAJUAN SOALAN</span>
+        <span class="hud-val" id="hud-qnum">1 / 10</span>
+        <div class="progress-wrapper"><div class="progress-fill" id="progress-bar"></div></div>
+      </div>
+    </div>
+
+    <div class="hud-group">
+      <div class="hud-box" style="text-align: right;">
+        <span class="hud-label">SKOR KOTA</span>
+        <span class="hud-val" id="hud-score" style="color:var(--yellow-neon); font-size: 18px;">0</span>
+      </div>
+      <div id="timer-box">15</div>
+    </div>
+  </div>
+
+  <!-- PANEL SOALAN MATEMATIK -->
+  <div id="question-panel" class="hidden">
+    <div class="q-title">DEKOD KOD KESELAMATAN PINTU</div>
+    <div class="q-text" id="q-display">245 + 132 = ?</div>
+    <div class="answers-grid">
+      <button class="btn-ans" onclick="submitAnswer(0)"><span class="key-tag">A</span> <span id="ans-0">377</span></button>
+      <button class="btn-ans" onclick="submitAnswer(1)"><span class="key-tag">B</span> <span id="ans-1">367</span></button>
+      <button class="btn-ans" onclick="submitAnswer(2)"><span class="key-tag">C</span> <span id="ans-2">387</span></button>
+      <button class="btn-ans" onclick="submitAnswer(3)"><span class="key-tag">D</span> <span id="ans-3">357</span></button>
+    </div>
+  </div>
+
+  <!-- HALAMAN UTAMA (START OVERLAY) -->
+  <div id="start-overlay" class="overlay">
+    <div class="modal-card">
+      <div class="logo-badge">KSSR MATEMATIK TAHUN 4</div>
+      <h1>🏆 ESCAPE ROOM</h1>
+      <h2>OPERASI MENYELAMATKAN KOTA MATEMATIK</h2>
+      <p style="font-size:13px; color:#a0aec0; margin-bottom:20px; line-height:1.5;">
+        Robot A.I. telah mengunci makmal utama! Selesaikan 30 cabaran matematik 3-digit untuk melepaskan diri dan menyelamatkan Kota Matematik!
+      </p>
+
+      <form onsubmit="startGame(event)">
+        <div class="form-group">
+          <label>NAMA MURID</label>
+          <input type="text" id="input-name" placeholder="Masukkan nama penuh..." required autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label>NAMA SEKOLAH</label>
+          <input type="text" id="input-school" placeholder="Masukkan nama sekolah..." required autocomplete="off">
+        </div>
+        <button type="submit" class="btn-action">▶ MULA OPERASI</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- PAPARAN TAMAT (MISSION COMPLETE & RANKING) -->
+  <div id="end-overlay" class="overlay hidden">
+    <div class="modal-card" style="max-width: 620px;">
+      <div class="logo-badge" style="color:var(--green-neon);">SYABAS AGEN!</div>
+      <h1 style="color:var(--green-neon);">MISSION COMPLETE</h1>
+      <h2 style="margin-bottom: 10px;">ANDA BERJAYA OUT OF ESCAPE ROOM!</h2>
+      
+      <div style="font-size:26px; margin:5px 0;">⭐⭐⭐⭐⭐</div>
+      <p style="font-size:14px;">Tahniah, <b id="final-name" style="color:var(--cyan-neon);"></b> (<span id="final-school"></span>)!</p>
+      
+      <div style="display:flex; justify-content:center; gap:25px; margin: 15px 0;">
+        <div><span style="font-size:11px; color:#a0aec0; display:block;">JUMLAH MARKAH</span><b id="final-score" style="color:var(--yellow-neon); font-size:22px;">0</b></div>
+        <div><span style="font-size:11px; color:#a0aec0; display:block;">JUMLAH MASA</span><b id="final-time" style="color:var(--cyan-neon); font-size:22px;">0s</b></div>
+        <div><span style="font-size:11px; color:#a0aec0; display:block;">JUMLAH PERCUBAAN</span><b id="final-attempts" style="color:#fff; font-size:22px;">0</b></div>
+      </div>
+
+      <h3 style="color:var(--cyan-neon); font-size:13px; text-align:left; margin-top:10px;">🏆 CARTA RANKING TOP 10</h3>
+      <div class="ranking-container">
+        <table class="ranking-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>NAMA</th>
+              <th>SEKOLAH</th>
+              <th>MARKAH</th>
+              <th>MASA</th>
+              <th>TRY</th>
+            </tr>
+          </thead>
+          <tbody id="ranking-body"></tbody>
+        </table>
+      </div>
+
+      <button class="btn-action" onclick="location.reload()">🔄 MAIN SEMULA</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ==========================================================================
+     7. WEB AUDIO API SYNTHESIZER (SISTEM BUNYI DYNAMIC TANPA FILE LUARAN)
+     ========================================================================== */
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  let audioCtx;
+
+  function initAudio() {
+    if (!audioCtx) audioCtx = new AudioCtx();
+  }
+
+  function playSound(type) {
+    if (!audioCtx) return;
+    const now = audioCtx.currentTime;
+
+    if (type === 'correct') {
+      // Bunyi DING Harmoni
+      const osc1 = audioCtx.createOscillator();
+      const osc2 = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc1.type = 'sine'; osc2.type = 'triangle';
+      osc1.frequency.setValueAtTime(523.25, now); // C5
+      osc1.frequency.setValueAtTime(659.25, now + 0.1); // E5
+      osc1.frequency.setValueAtTime(783.99, now + 0.2); // G5
+      osc2.frequency.setValueAtTime(1046.50, now + 0.2); // C6
+      gain.gain.setValueAtTime(0.2, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+      osc1.connect(gain); osc2.connect(gain); gain.connect(audioCtx.destination);
+      osc1.start(now); osc2.start(now); osc1.stop(now + 0.5); osc2.stop(now + 0.5);
+
+    } else if (type === 'wrong') {
+      // Bunyi BUZZ Salah
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(160, now);
+      osc.frequency.setValueAtTime(110, now + 0.15);
+      gain.gain.setValueAtTime(0.3, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(now); osc.stop(now + 0.4);
+
+    } else if (type === 'tick') {
+      // Bunyi Beep Timer
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(880, now);
+      gain.gain.setValueAtTime(0.05, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(now); osc.stop(now + 0.05);
+
+    } else if (type === 'door') {
+      // Bunyi Pintu Automatik (Pneumatic Sweep)
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(120, now);
+      osc.frequency.exponentialRampToValueAtTime(600, now + 0.6);
+      gain.gain.setValueAtTime(0.2, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(now); osc.stop(now + 0.6);
+
+    } else if (type === 'alarm') {
+      // Bunyi Alarm Masa Habis
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(800, now);
+      osc.frequency.setValueAtTime(400, now + 0.1);
+      gain.gain.setValueAtTime(0.25, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(now); osc.stop(now + 0.3);
+
+    } else if (type === 'victory') {
+      // Fanfare Kemenangan
+      [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.frequency.setValueAtTime(freq, now + idx * 0.12);
+        gain.gain.setValueAtTime(0.2, now + idx * 0.12);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 0.4);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(now + idx * 0.12); osc.stop(now + idx * 0.12 + 0.4);
+      });
+    }
+  }
+
+  /* ==========================================================================
+     8. JANA BANK SOALAN MATEMATIK (RANDOM GENERATOR KSSR TAHUN 4)
+     ========================================================================== */
+  function randInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  function generateQuestionBank() {
+    const bank = { 1: [], 2: [], 3: [] };
+
+    // TAHAP 1: RENDAH (Tambah 3 digit tanpa/kurang pengumpulan semula)
+    for (let i = 0; i < 10; i++) {
+      let num1 = randInt(100, 500);
+      let num2 = randInt(100, 480);
+      let correct = num1 + num2;
+      bank[1].push(createQuestionItem(num1, num2, correct));
+    }
+
+    // TAHAP 2: SEDERHANA (Tambah 3 digit dengan pengumpulan semula Sa & Puluh)
+    for (let i = 0; i < 10; i++) {
+      let num1 = randInt(250, 680);
+      let num2 = randInt(180, 290);
+      let correct = num1 + num2;
+      bank[2].push(createQuestionItem(num1, num2, correct));
+    }
+
+    // TAHAP 3: TINGGI (Tambah 3 digit pengumpulan semula mencabar)
+    for (let i = 0; i < 10; i++) {
+      let num1 = randInt(450, 890);
+      let num2 = randInt(280, 890);
+      let correct = num1 + num2;
+      bank[3].push(createQuestionItem(num1, num2, correct));
+    }
+
+    return bank;
+  }
+
+  function createQuestionItem(n1, n2, correct) {
+    let wrongSet = new Set();
+    while (wrongSet.size < 3) {
+      let offset = randInt(-30, 30);
+      if (offset !== 0) {
+        let w = correct + offset;
+        if (w >= 200 && w <= 1998) wrongSet.add(w);
+      }
+    }
+    let options = Array.from(wrongSet);
+    let correctIdx = randInt(0, 3);
+    options.splice(correctIdx, 0, correct);
+
+    return {
+      q: `${n1} + ${n2} = ?`,
+      options: options.map(String),
+      ans: correctIdx
+    };
+  }
+
+  /* ==========================================================================
+     9. KAWALAN LOGIK PERMAINAN (GAME STATE MANAGEMENT)
+     ========================================================================== */
+  let questionBank = {};
+  let playerName = "";
+  let playerSchool = "";
+  let currentLevel = 1;
+  let currentQIndex = 0;
+  let score = 0;
+  let totalTimeSpent = 0;
+  let totalAttempts = 0;
+  let timeLeft = 15;
+  let timerInterval = null;
+  let globalTimerInterval = null;
+  let hasWrongInCurrentQ = false;
+
+  // Visual Animation States
+  let doorAnimProgress = 0; // 0 = Tertutup, 1 = Terbuka
+  let doorOpening = false;
+
+  function startGame(e) {
+    e.preventDefault();
+    initAudio();
+
+    playerName = document.getElementById('input-name').value.trim();
+    playerSchool = document.getElementById('input-school').value.trim();
+
+    if (!playerName || !playerSchool) return;
+
+    document.getElementById('hud-name').innerText = playerName;
+    document.getElementById('hud-school').innerText = playerSchool;
+
+    questionBank = generateQuestionBank();
+
+    // Tunjukkan Splash
+    const splash = document.getElementById('splash-text');
+    splash.classList.remove('hidden');
+    playSound('door');
+
+    setTimeout(() => {
+      splash.classList.add('hidden');
+      document.getElementById('start-overlay').classList.add('hidden');
+      document.getElementById('top-hud').classList.remove('hidden');
+      document.getElementById('question-panel').classList.remove('hidden');
+
+      // Mulakan Pemasa Global
+      globalTimerInterval = setInterval(() => { totalTimeSpent++; }, 1000);
+
+      loadCurrentQuestion();
+      renderCanvasAnimation();
+    }, 1200);
+  }
+
+  function loadCurrentQuestion() {
+    hasWrongInCurrentQ = false;
+    timeLeft = 15;
+    updateTimerUI();
+
+    const qData = questionBank[currentLevel][currentQIndex];
+    document.getElementById('q-display').innerText = qData.q;
+    document.getElementById('hud-qnum').innerText = `${currentQIndex + 1} / 10`;
+
+    // Update Progress Bar
+    let overallProgress = (((currentLevel - 1) * 10) + currentQIndex) / 30 * 100;
+    document.getElementById('progress-bar').style.width = `${overallProgress}%`;
+
+    // Update Level Badge
+    const diffBadge = document.getElementById('hud-diff');
+    if (currentLevel === 1) {
+      diffBadge.innerText = "TAHAP 1: RENDAH";
+      diffBadge.className = "badge-diff diff-1";
+    } else if (currentLevel === 2) {
+      diffBadge.innerText = "TAHAP 2: SEDERHANA";
+      diffBadge.className = "badge-diff diff-2";
+    } else {
+      diffBadge.innerText = "TAHAP 3: TINGGI";
+      diffBadge.className = "badge-diff diff-3";
+    }
+
+    // Set Option Buttons
+    for (let i = 0; i < 4; i++) {
+      document.getElementById(`ans-${i}`).innerText = qData.options[i];
+    }
+
+    // Start Timer
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      updateTimerUI();
+
+      if (timeLeft <= 0) {
+        // Masa Habis!
+        playSound('alarm');
+        triggerShake();
+        totalAttempts++;
+        hasWrongInCurrentQ = true;
+        timeLeft = 15; // Masa diulang semula, soalan kekal
+      } else if (timeLeft <= 5) {
+        playSound('tick');
+      }
+    }, 1000);
+  }
+
+  function updateTimerUI() {
+    const timerElem = document.getElementById('timer-box');
+    timerElem.innerText = timeLeft;
+    if (timeLeft <= 5) {
+      timerElem.classList.add('warning');
+    } else {
+      timerElem.classList.remove('warning');
+    }
+  }
+
+  function triggerShake() {
+    const container = document.getElementById('game-container');
+    container.classList.add('shake');
+    setTimeout(() => container.classList.remove('shake'), 400);
+  }
+
+  function submitAnswer(selectedIndex) {
+    totalAttempts++;
+    const qData = questionBank[currentLevel][currentQIndex];
+
+    if (selectedIndex === qData.ans) {
+      // JAWAPAN BETUL!
+      playSound('correct');
+
+      // Pengiraan Markah
+      if (!hasWrongInCurrentQ) {
+        score += 10; // Betul kali pertama
+      } else {
+        score += 5; // Betul selepas pernah salah/habis masa
+      }
+      document.getElementById('hud-score').innerText = score;
+
+      // Animate Pintu Terbuka
+      doorOpening = true;
+      playSound('door');
+
+      setTimeout(() => {
+        doorOpening = false;
+        doorAnimProgress = 0;
+
+        // Ke soalan seterusnya
+        currentQIndex++;
+        if (currentQIndex >= 10) {
+          currentQIndex = 0;
+          currentLevel++;
+        }
+
+        if (currentLevel > 3) {
+          finishGame();
+        } else {
+          loadCurrentQuestion();
+        }
+      }, 700);
+
+    } else {
+      // JAWAPAN SALAH!
+      playSound('wrong');
+      triggerShake();
+      hasWrongInCurrentQ = true;
+    }
+  }
+
+  function finishGame() {
+    clearInterval(timerInterval);
+    clearInterval(globalTimerInterval);
+
+    playSound('victory');
+    spawnConfetti();
+
+    document.getElementById('question-panel').classList.add('hidden');
+    document.getElementById('top-hud').classList.add('hidden');
+    document.getElementById('end-overlay').classList.remove('hidden');
+
+    document.getElementById('final-name').innerText = playerName;
+    document.getElementById('final-school').innerText = playerSchool;
+    document.getElementById('final-score').innerText = score;
+    document.getElementById('final-time').innerText = `${totalTimeSpent}s`;
+    document.getElementById('final-attempts').innerText = totalAttempts;
+
+    saveRanking(playerName, playerSchool, score, totalTimeSpent, totalAttempts);
+    renderRankingTable();
+  }
+
+  /* ==========================================================================
+     10. LOCALSTORAGE RANKING SYSTEM (TOP 10)
+     ========================================================================== */
+  const STORAGE_KEY = 'escape_room_matematik_rankings';
+
+  function saveRanking(name, school, scoreVal, timeVal, attemptsVal) {
+    let rankings = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    rankings.push({
+      name,
+      school,
+      score: scoreVal,
+      time: timeVal,
+      attempts: attemptsVal,
+      date: new Date().toLocaleDateString()
+    });
+
+    // Ranking dikira berdasarkan: 1. Markah Tertinggi, 2. Masa Terpantas, 3. Percubaan Terpaling Sedikit
+    rankings.sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      if (a.time !== b.time) return a.time - b.time;
+      return a.attempts - b.attempts;
+    });
+
+    rankings = rankings.slice(0, 10); // Ambil TOP 10
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(rankings));
+  }
+
+  function renderRankingTable() {
+    let rankings = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    const tbody = document.getElementById('ranking-body');
+    tbody.innerHTML = '';
+
+    if (rankings.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Tiada rekod ranking lagi.</td></tr>`;
+      return;
+    }
+
+    rankings.forEach((r, idx) => {
+      tbody.innerHTML += `
+        <tr>
+          <td><b>${idx + 1}</b></td>
+          <td>${r.name}</td>
+          <td>${r.school}</td>
+          <td style="color:var(--yellow-neon); font-weight:bold;">${r.score}</td>
+          <td>${r.time}s</td>
+          <td>${r.attempts}</td>
+        </tr>
+      `;
+    });
+  }
+
+  function spawnConfetti() {
+    const colors = ['#00f3ff', '#39ff14', '#ffe600', '#ff0055', '#ffffff'];
+    const container = document.getElementById('game-container');
+    for (let i = 0; i < 60; i++) {
+      let conf = document.createElement('div');
+      conf.className = 'confetti';
+      conf.style.left = Math.random() * 100 + '%';
+      conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      conf.style.animationDelay = Math.random() * 2 + 's';
+      conf.style.animationDuration = (Math.random() * 2 + 2) + 's';
+      container.appendChild(conf);
+    }
+  }
+
+  /* ==========================================================================
+     11. GRAPHICS ENGINE (CANVAS ANIMATION - FUTURISTIC LAB, LASER DOOR, ROBOT AI)
+     ========================================================================== */
+  const canvas = document.getElementById('bgCanvas');
+  const ctx = canvas.getContext('2d');
+
+  // Particle System
+  const particles = [];
+  for (let i = 0; i < 40; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      radius: Math.random() * 2 + 1,
+      vy: -Math.random() * 0.5 - 0.2,
+      alpha: Math.random() * 0.5 + 0.2
+    });
+  }
+
+  function renderCanvasAnimation() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // 1. Digital Wall Grid
+    ctx.fillStyle = '#020612';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.strokeStyle = 'rgba(0, 243, 255, 0.04)';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < canvas.width; x += 40) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+    }
+    for (let y = 0; y < canvas.height; y += 40) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+    }
+
+    // 2. Floating Dust/Smoke Zarah
+    particles.forEach(p => {
+      p.y += p.vy;
+      if (p.y < 0) p.y = canvas.height;
+      ctx.fillStyle = `rgba(0, 243, 255, ${p.alpha})`;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    // 3. Security Door Frame (Center)
+    const doorX = canvas.width / 2;
+    const doorY = 230;
+    const doorW = 380;
+    const doorH = 260;
+
+    // Door Outer Frame
+    ctx.fillStyle = '#0a1424';
+    ctx.fillRect(doorX - doorW/2 - 25, doorY - 25, doorW + 50, doorH + 50);
+    ctx.strokeStyle = 'var(--cyan-neon)';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(doorX - doorW/2 - 25, doorY - 25, doorW + 50, doorH + 50);
+
+    // Door Opening Animation Logic
+    if (doorOpening) {
+      if (doorAnimProgress < 1) doorAnimProgress += 0.08;
+    }
+
+    const slideOffset = (doorW / 2) * doorAnimProgress;
+
+    // Left Blast Door Metal Panel
+    ctx.fillStyle = '#111e38';
+    ctx.fillRect(doorX - doorW/2 - slideOffset, doorY, doorW/2, doorH);
+    ctx.strokeStyle = '#1d3557'; ctx.lineWidth = 2;
+    ctx.strokeRect(doorX - doorW/2 - slideOffset, doorY, doorW/2, doorH);
+
+    // Right Blast Door Metal Panel
+    ctx.fillStyle = '#111e38';
+    ctx.fillRect(doorX + slideOffset, doorY, doorW/2, doorH);
+    ctx.strokeRect(doorX + slideOffset, doorY, doorW/2, doorH);
+
+    // Red Security Laser Beams (If door closed)
+    if (doorAnimProgress < 0.5) {
+      ctx.strokeStyle = '#ff0055';
+      ctx.shadowColor = '#ff0055';
+      ctx.shadowBlur = 12;
+      ctx.lineWidth = 3;
+      for (let i = -doorH/2 + 20; i < doorH/2; i += 25) {
+        ctx.beginPath();
+        ctx.moveTo(doorX - doorW/2 + 10, doorY + doorH/2 + i);
+        ctx.lineTo(doorX + doorW/2 - 10, doorY + doorH/2 + i);
+        ctx.stroke();
+      }
+      ctx.shadowBlur = 0; // Reset glow
+    } else {
+      // Green Hologram Glow Behind Opened Door
+      ctx.fillStyle = 'rgba(57, 255, 20, 0.25)';
+      ctx.fillRect(doorX - doorW/2, doorY, doorW, doorH);
+    }
+
+    // 4. Robot AI Guardian Overhead
+    const robotX = doorX;
+    const robotY = doorY - 60;
+
+    // Robot Head
+    ctx.fillStyle = '#1e293b';
+    ctx.beginPath();
+    ctx.arc(robotX, robotY, 28, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = varColor('--cyan-neon');
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Robot AI Eye Light
+    ctx.fillStyle = doorOpening ? varColor('--green-neon') : (timeLeft <= 5 ? varColor('--red-neon') : varColor('--cyan-neon'));
+    ctx.shadowColor = ctx.fillStyle;
+    ctx.shadowBlur = 15;
+    ctx.beginPath();
+    ctx.arc(robotX, robotY, 10, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Robot Ears/Antenna
+    ctx.fillStyle = '#475569';
+    ctx.fillRect(robotX - 38, robotY - 5, 8, 10);
+    ctx.fillRect(robotX + 30, robotY - 5, 8, 10);
+
+    requestAnimationFrame(renderCanvasAnimation);
+  }
+
+  function varColor(name) {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
+
+  // Keyboard Shortcuts (A, B, C, D)
+  window.addEventListener('keydown', (e) => {
+    if (document.getElementById('question-panel').classList.contains('hidden')) return;
+    const k = e.key.toLowerCase();
+    if (k === 'a') submitAnswer(0);
+    if (k === 'b') submitAnswer(1);
+    if (k === 'c') submitAnswer(2);
+    if (k === 'd') submitAnswer(3);
+  });
+</script>
+</body>
+</html>
