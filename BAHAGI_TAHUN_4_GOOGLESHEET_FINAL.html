@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏰 数学逃脱密室 - 智能学习报告版</title>
+    <style>
+        :root {
+            --bg-bright: linear-gradient(135deg, #162447 0%, #1f4068 100%);
+            --accent-red: #e43f5a;
+            --accent-gold: #ffcc00;
+            --accent-cyan: #00e5ff;
+            --text-light: #ffffff;
+            --cell-size: 46px;
+        }
+
+        * { box-sizing: border-box; user-select: none; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-bright);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 780px;
+            background: rgba(27, 27, 47, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 0 25px rgba(0, 229, 255, 0.3);
+            border: 3px solid var(--accent-cyan);
+            padding: 15px;
+        }
+
+        .shake { animation: shakeAnim 0.4s ease-in-out; }
+        @keyframes shakeAnim {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+
+        .view-screen { display: none; flex-direction: column; gap: 12px; }
+        .view-screen.active { display: flex; }
+
+        .player-hud {
+            display: flex; justify-content: space-between; align-items: center;
+            background: var(--accent-red); padding: 8px 14px; border-radius: 12px;
+            border: 2px solid var(--accent-gold); font-size: 16px; font-weight: 900;
+        }
+
+        .level-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            background: #0f4c75; padding: 6px 12px; border-radius: 10px;
+            border: 2px solid #fff; font-size: 14px; font-weight: bold;
+        }
+
+        .ai-speech-box {
+            display: flex; align-items: center; gap: 10px; background: #162447;
+            padding: 8px 12px; border-radius: 10px; border: 2px solid var(--accent-gold);
+            font-size: 14px; font-weight: bold;
+        }
+
+        .workspace-container {
+            display: flex; gap: 20px; justify-content: center;
+            align-items: flex-start; flex-wrap: wrap;
+        }
+
+        .visual-workspace {
+            display: none; background: #0f1423; border-radius: 12px;
+            border: 2px solid var(--accent-cyan); padding: 15px;
+            flex-direction: column; align-items: center; gap: 12px;
+            overflow-x: auto;
+        }
+        .visual-workspace.active { display: flex; }
+
+        .draft-board {
+            background: #101d36; border: 2px dashed var(--accent-gold);
+            border-radius: 12px; padding: 10px 14px; min-width: 200px;
+        }
+        .draft-title {
+            font-size: 14px; font-weight: 900; color: var(--accent-gold);
+            margin-bottom: 8px; text-align: center;
+            border-bottom: 1px dashed rgba(255, 204, 0, 0.4); padding-bottom: 4px;
+        }
+        .draft-list { display: flex; flex-direction: column; gap: 6px; font-size: 15px; font-weight: 700; }
+        .draft-item { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 6px; }
+        .draft-input {
+            width: 55px; height: 32px; background: #fff; border: 2px solid var(--accent-cyan);
+            border-radius: 6px; text-align: center; font-size: 16px; font-weight: 900; color: #000; outline: none;
+        }
+
+        .division-layout { display: flex; align-items: flex-start; }
+        .divisor-cell {
+            height: var(--cell-size); line-height: var(--cell-size); text-align: right;
+            padding-right: 8px; color: var(--accent-gold); font-size: 26px; font-weight: 900;
+            margin-top: calc(var(--cell-size) + 4px); white-space: nowrap;
+        }
+        .division-grid { display: flex; flex-direction: column; }
+        .div-row { display: grid; gap: 4px; height: var(--cell-size); margin-bottom: 4px; }
+        .cell-box {
+            width: var(--cell-size); height: var(--cell-size); aspect-ratio: 1 / 1;
+            display: flex; justify-content: center; align-items: center; font-size: 24px; font-weight: 900;
+        }
+        input.cell-box {
+            background: #ffffff; border: 2px solid var(--accent-cyan); color: #000;
+            border-radius: 8px; outline: none; text-align: center; padding: 0; font-size: 24px; font-weight: 900;
+        }
+        input.cell-box.quotient { border-color: var(--accent-gold); background: #fffbe6; }
+        .house-body { border-left: 3px solid #fff; border-top: 3px solid #fff; border-top-left-radius: 6px; padding-top: 4px; padding-left: 4px; }
+        .sub-line { height: 2px; background-color: var(--accent-gold); margin: 2px 0 4px 0; }
+
+        .q-card { background: linear-gradient(180deg, #1f4068 0%, #162447 100%); border-radius: 12px; padding: 10px; text-align: center; border: 2px solid var(--accent-gold); }
+        .q-text { font-size: 24px; font-weight: 900; color: #fff; }
+
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .btn-opt {
+            background: linear-gradient(180deg, #00e5ff 0%, #0088ff 100%);
+            border: 2px solid #ffffff; color: #ffffff; font-size: 18px; font-weight: 900;
+            padding: 10px; border-radius: 10px; cursor: pointer; text-shadow: 1px 1px 0px #000;
+        }
+
+        .btn-action {
+            background: linear-gradient(180deg, #00e676 0%, #00a040 100%); color: white; border: 2px solid #ffffff;
+            padding: 10px; font-size: 16px; font-weight: 900; border-radius: 10px; cursor: pointer; width: 100%;
+        }
+
+        /* 成绩报告单样式 (支持打印) */
+        .report-card {
+            background: #ffffff; color: #000; border-radius: 12px; padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5); font-family: 'SimSun', 'Microsoft YaHei', sans-serif;
+        }
+        .report-header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 15px; }
+        .report-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; font-size: 15px; }
+        .report-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 14px; }
+        .report-table th, .report-table td { border: 1px solid #333; padding: 6px; text-align: center; }
+        .report-table th { background: #f0f0f0; }
+
+        @media print {
+            body { background: none; color: #000; }
+            .app-container { border: none; box-shadow: none; width: 100%; max-width: 100%; padding: 0; }
+            .no-print { display: none !important; }
+            .report-card { box-shadow: none; border: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container" id="app-container">
+
+    <!-- 1. 登录界面 -->
+    <div id="screen-login" class="view-screen active">
+        <div style="text-align:center; margin-bottom: 10px;">
+            <h1 style="color:var(--accent-gold); font-size:26px;">🏰 数学逃脱密室</h1>
+            <p style="color:var(--accent-cyan); font-size:14px; font-weight:bold;">除法大挑战 (含学习报告打印) ➗</p>
+        </div>
+        <div style="background:#1f4068; padding:15px; border-radius:12px; border:2px solid var(--accent-gold); display:flex; flex-direction:column; gap:10px;">
+            <div>
+                <label style="color:var(--accent-gold); font-size:14px; font-weight:bold;">👦 学生姓名：</label>
+                <input type="text" id="input-name" style="width:100%; padding:8px; margin-top:4px; border-radius:6px; border:none; font-size:16px; font-weight:bold;" value="林小明">
+            </div>
+            <div>
+                <label style="color:var(--accent-gold); font-size:14px; font-weight:bold;">🏫 班级/学号：</label>
+                <input type="text" id="input-class" style="width:100%; padding:8px; margin-top:4px; border-radius:6px; border:none; font-size:16px; font-weight:bold;" value="三年级2班 08号">
+            </div>
+        </div>
+        <button class="btn-action" onclick="startGame()">🚀 开始10关大挑战</button>
+    </div>
+
+    <!-- 2. 游戏答题界面 -->
+    <div id="screen-game" class="view-screen">
+        <div class="player-hud">
+            <div>👤 <span id="hud-name">小明</span></div>
+            <div>🪙 得分: <span id="hud-coins" style="color:var(--accent-gold);">0</span></div>
+        </div>
+
+        <div class="level-bar">
+            <div>关卡进度：<span id="level-indicator">1/10</span></div>
+            <div id="ai-level-badge" style="color:var(--accent-cyan);">🟢 Level 1：独立挑战</div>
+        </div>
+
+        <div class="ai-speech-box">
+            <div style="font-size:22px;">👩‍🏫</div>
+            <div id="ai-speech">记住除法四字诀：商、乘、减、落！</div>
+        </div>
+
+        <div class="visual-workspace" id="visual-workspace"></div>
+
+        <div class="q-card">
+            <div class="q-text" id="q-text">848 ÷ 4 = ?</div>
+        </div>
+
+        <div class="options-grid" id="options-grid"></div>
+    </div>
+
+    <!-- 3. 成绩报告单界面 -->
+    <div id="screen-report" class="view-screen">
+        <div class="report-card" id="report-card">
+            <div class="report-header">
+                <h2>🎓 小学数学《两位数除法》学习诊断报告单</h2>
+            </div>
+            <div class="report-grid">
+                <div><b>学生姓名：</b> <span id="rep-name">--</span></div>
+                <div><b>班级学号：</b> <span id="rep-class">--</span></div>
+                <div><b>测试时间：</b> <span id="rep-date">--</span></div>
+                <div><b>答题用时：</b> <span id="rep-time">--</span></div>
+                <div><b>最终得分：</b> <span id="rep-score" style="color:red; font-weight:bold;">--</span> 分</div>
+                <div><b>首次独立正确率：</b> <span id="rep-accuracy">--</span></div>
+            </div>
+
+            <table class="report-table">
+                <thead>
+                    <tr>
+                        <th>题号</th>
+                        <th>题目</th>
+                        <th>标准答案</th>
+                        <th>第一次尝试</th>
+                        <th>获得辅助</th>
+                    </tr>
+                </thead>
+                <tbody id="rep-table-body">
+                    <!-- 动态生成答题记录 -->
+                </tbody>
+            </table>
+
+            <div style="margin-top: 10px; font-size: 13px; color: #555;">
+                <b>教师评价/建议：</b> <span id="rep-comment">表现优秀！对除法计算掌握熟练。</span>
+            </div>
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:10px;" class="no-print">
+            <button class="btn-action" style="background:#0088ff;" onclick="window.print()">🖨️ 打印 / 导出PDF报告</button>
+            <button class="btn-action" style="background:#e43f5a;" onclick="location.reload()">🔄 重新挑战</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    class SoundEngine {
+        constructor() { this.ctx = null; }
+        init() { if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); }
+        playDing() {
+            this.init();
+            const osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+            osc.type = 'sine'; osc.frequency.setValueAtTime(523.25, this.ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(1046.50, this.ctx.currentTime + 0.3);
+            gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+            osc.connect(gain); gain.connect(this.ctx.destination);
+            osc.start(); osc.stop(this.ctx.currentTime + 0.3);
+        }
+        playBuzz() {
+            this.init();
+            const osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(160, this.ctx.currentTime);
+            gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+            osc.connect(gain); gain.connect(this.ctx.destination);
+            osc.start(); osc.stop(this.ctx.currentTime + 0.3);
+        }
+    }
+    const soundAudio = new SoundEngine();
+
+    const divQuestions = [
+        { q: "848 ÷ 4 = ?", dividend: 848, divisor: 4, ans: "212", opts: ["214", "212", "202", "222"] },
+        { q: "639 ÷ 3 = ?", dividend: 639, divisor: 3, ans: "213", opts: ["231", "203", "213", "313"] },
+        { q: "1248 ÷ 4 = ?", dividend: 1248, divisor: 4, ans: "312", opts: ["311", "322", "212", "312"] },
+        { q: "2480 ÷ 8 = ?", dividend: 2480, divisor: 8, ans: "310", opts: ["310", "305", "320", "315"] },
+        { q: "1836 ÷ 6 = ?", dividend: 1836, divisor: 6, ans: "306", opts: ["360", "306", "316", "304"] },
+        { q: "1560 ÷ 12 = ?", dividend: 1560, divisor: 12, ans: "130", opts: ["120", "140", "130", "135"] },
+        { q: "2808 ÷ 18 = ?", dividend: 2808, divisor: 18, ans: "156", opts: ["146", "166", "154", "156"] },
+        { q: "3450 ÷ 25 = ?", dividend: 3450, divisor: 25, ans: "138", opts: ["138", "128", "148", "135"] },
+        { q: "5040 ÷ 32 = ?", dividend: 5040, divisor: 32, ans: "157", opts: ["158", "157", "147", "167"] },
+        { q: "7236 ÷ 36 = ?", dividend: 7236, divisor: 36, ans: "201", opts: ["210", "202", "201", "191"] }
+    ];
+
+    let currentQIndex = 0;
+    let playerData = { name: '', classInfo: '', score: 0 };
+    let currentAiLevel = 1;
+    let startTime = null;
+    let studentLogs = []; // 答题日志记录
+
+    function startGame() {
+        playerData.name = document.getElementById('input-name').value || "无名";
+        playerData.classInfo = document.getElementById('input-class').value || "未填写";
+        document.getElementById('hud-name').innerText = playerData.name;
+        startTime = new Date();
+        studentLogs = [];
+        showScreen('screen-game');
+        loadQuestion();
+    }
+
+    function showScreen(id) {
+        document.querySelectorAll('.view-screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    function loadQuestion() {
+        currentAiLevel = 1;
+        const q = divQuestions[currentQIndex];
+        document.getElementById('level-indicator').innerText = `${currentQIndex + 1}/${divQuestions.length}`;
+        document.getElementById('q-text').innerText = q.q;
+        renderOptions(q.opts, q.ans);
+        updateAiUI();
+    }
+
+    function renderOptions(opts, correct) {
+        const grid = document.getElementById('options-grid');
+        grid.innerHTML = '';
+        opts.forEach((opt, i) => {
+            const btn = document.createElement('button');
+            btn.className = 'btn-opt';
+            btn.innerText = `${String.fromCharCode(65 + i)}. ${opt}`;
+            btn.onclick = () => handleAnswer(opt === correct, opt);
+            grid.appendChild(btn);
+        });
+    }
+
+    function handleAnswer(isCorrect, selectedOpt) {
+        if (!studentLogs[currentQIndex]) {
+            studentLogs[currentQIndex] = {
+                qIndex: currentQIndex + 1,
+                question: divQuestions[currentQIndex].q,
+                correctAns: divQuestions[currentQIndex].ans,
+                firstTry: selectedOpt,
+                isFirstTryCorrect: isCorrect,
+                neededHelper: false
+            };
+        }
+
+        if (isCorrect) {
+            soundAudio.playDing();
+            let addScore = currentAiLevel === 1 ? 10 : 5; // 独立做对得10分，靠辅助得5分
+            playerData.score += addScore;
+            document.getElementById('hud-coins').innerText = playerData.score;
+            
+            currentQIndex++;
+            if (currentQIndex < divQuestions.length) {
+                loadQuestion();
+            } else {
+                finishGame();
+            }
+        } else {
+            soundAudio.playBuzz();
+            currentAiLevel = 2;
+            studentLogs[currentQIndex].neededHelper = true;
+            
+            document.getElementById('app-container').classList.add('shake');
+            setTimeout(() => document.getElementById('app-container').classList.remove('shake'), 400);
+            updateAiUI();
+        }
+    }
+
+    function updateAiUI() {
+        const badge = document.getElementById('ai-level-badge');
+        const speech = document.getElementById('ai-speech');
+        const workspace = document.getElementById('visual-workspace');
+
+        const tag = currentQIndex < 5 ? "【简单题】" : "【困难题】";
+
+        if (currentAiLevel === 1) {
+            badge.innerText = `🟢 Level 1：独立挑战 ${tag}`;
+            speech.innerText = "用乘法口诀计算，选择正确答案！";
+            workspace.classList.remove('active');
+        } else {
+            badge.innerText = `🟡 Level 2：除法竖式助手 ${tag}`;
+            speech.innerText = "填写竖式/草稿助手，拆解计算步骤！";
+            workspace.classList.add('active');
+            renderDivisionScaffold(divQuestions[currentQIndex]);
+        }
+    }
+
+    let currentScaffoldData = null;
+    let currentDraftData = {};
+
+    function renderDivisionScaffold(q) {
+        const dividendStr = q.dividend.toString();
+        const divisor = q.divisor;
+        const divisorStr = divisor.toString();
+        const ansStr = q.ans.toString();
+
+        const divLen = dividendStr.length;
+        const ansLen = ansStr.length;
+        let startIndex = divLen - ansLen;
+
+        let expectedGrid = {};
+        currentDraftData = {};
+        let gridStyle = `style="grid-template-columns: repeat(${divLen}, var(--cell-size));"`;
+
+        let html = `<div class="workspace-container">
+            <div class="division-layout">
+                <div class="divisor-cell">${divisorStr}</div>
+                <div class="division-grid">
+                    <div class="div-row" ${gridStyle}>`;
+
+        for (let c = 0; c < divLen; c++) {
+            if (c < startIndex) {
+                html += `<div class="cell-box"></div>`;
+            } else {
+                let qIdx = c - startIndex;
+                expectedGrid[`q_${c}`] = ansStr[qIdx];
+                html += `<input type="text" class="cell-box quotient" id="grid-q-${c}" maxlength="1">`;
+            }
+        }
+
+        html += `</div><div class="house-body"><div class="div-row" ${gridStyle}>`;
+
+        for (let c = 0; c < divLen; c++) {
+            html += `<div class="cell-box">${dividendStr[c]}</div>`;
+        }
+        html += `</div>`;
+
+        let currentRem = 0;
+        for (let i = 0; i < ansLen; i++) {
+            let colIndex = startIndex + i;
+            let currentDigit = parseInt(dividendStr[colIndex]);
+            let workingNum = currentRem * 10 + currentDigit;
+            let qDigit = parseInt(ansStr[i]);
+            let prod = qDigit * divisor;
+            let nextRem = workingNum - prod;
+
+            let prodStr = prod.toString();
+            html += `<div class="div-row" ${gridStyle}>`;
+            for (let c = 0; c < divLen; c++) {
+                let prodOffset = colIndex - c;
+                if (prodOffset >= 0 && prodOffset < prodStr.length) {
+                    let charIdx = prodStr.length - 1 - prodOffset;
+                    expectedGrid[`prod_${i}_${c}`] = prodStr[charIdx];
+                    html += `<input type="text" class="cell-box" id="grid-prod-${i}-${c}" maxlength="1">`;
+                } else {
+                    html += `<div class="cell-box"></div>`;
+                }
+            }
+            html += `</div><div class="sub-line"></div>`;
+
+            if (i < ansLen - 1) {
+                let nextColIndex = colIndex + 1;
+                let nextDigitStr = dividendStr[nextColIndex];
+                let combinedStr = (nextRem === 0 ? "" : nextRem.toString()) + nextDigitStr;
+                
+                html += `<div class="div-row" ${gridStyle}>`;
+                for (let c = 0; c < divLen; c++) {
+                    let offset = nextColIndex - c;
+                    if (offset >= 0 && offset < combinedStr.length) {
+                        let charIdx = combinedStr.length - 1 - offset;
+                        expectedGrid[`sub_${i}_${c}`] = combinedStr[charIdx];
+                        html += `<input type="text" class="cell-box" id="grid-sub-${i}-${c}" maxlength="1">`;
+                    } else {
+                        html += `<div class="cell-box"></div>`;
+                    }
+                }
+                html += `</div>`;
+            } else {
+                html += `<div class="div-row" ${gridStyle}>`;
+                for (let c = 0; c < divLen; c++) {
+                    if (c === colIndex) {
+                        expectedGrid[`rem_${colIndex}`] = nextRem.toString();
+                        html += `<input type="text" class="cell-box" id="grid-rem-${colIndex}" maxlength="1">`;
+                    } else {
+                        html += `<div class="cell-box"></div>`;
+                    }
+                }
+                html += `</div>`;
+            }
+            currentRem = nextRem;
+        }
+
+        html += `</div></div></div>`;
+
+        if (divisor >= 10) {
+            html += `<div class="draft-board">
+                <div class="draft-title">✏️ 试商草稿 (+${divisor})</div>
+                <div class="draft-list">`;
+            for (let m = 1; m <= 8; m++) {
+                let correctVal = divisor * m;
+                currentDraftData[`draft_${m}`] = correctVal.toString();
+                let exprStr = m === 1 ? `${divisor} × 1` : `${divisor * (m - 1)} + ${divisor}`;
+                html += `<div class="draft-item">
+                    <span>${exprStr} =</span>
+                    <input type="text" class="draft-input" id="draft-${m}" placeholder="?" maxlength="3">
+                </div>`;
+            }
+            html += `</div></div>`;
+        }
+
+        html += `</div>`;
+        html += `<button class="btn-action" style="max-width:220px; margin-top:10px;" onclick="checkDynamicScaffold()">✍️ 检查分步竖式</button>`;
+
+        currentScaffoldData = expectedGrid;
+        document.getElementById('visual-workspace').innerHTML = html;
+    }
+
+    function checkDynamicScaffold() {
+        if (!currentScaffoldData) return;
+        let isAllCorrect = true;
+
+        for (let key in currentScaffoldData) {
+            let id = key.replace(/_/g, '-');
+            let inputEl = document.getElementById(`grid-${id}`);
+            if (!inputEl) continue;
+            if (inputEl.value.trim() !== currentScaffoldData[key]) {
+                isAllCorrect = false;
+                inputEl.style.borderColor = "var(--accent-red)";
+            } else {
+                inputEl.style.borderColor = "var(--accent-cyan)";
+            }
+        }
+
+        for (let key in currentDraftData) {
+            let id = key.replace('_', '-');
+            let draftEl = document.getElementById(id);
+            if (!draftEl) continue;
+            if (draftEl.value.trim() !== currentDraftData[key]) {
+                isAllCorrect = false;
+                draftEl.style.borderColor = "var(--accent-red)";
+            } else {
+                draftEl.style.borderColor = "var(--accent-cyan)";
+            }
+        }
+
+        if (isAllCorrect) {
+            handleAnswer(true, divQuestions[currentQIndex].ans);
+        } else {
+            soundAudio.playBuzz();
+            alert("竖式或草稿中的数值有误，请检查标红的盒子！");
+        }
+    }
+
+
+    // =====================================================
+    // GOOGLE SHEET - DME TAHUN 4
+    // 同一个四年级 DME Google Sheet
+    // 操作：Bahagi（除法）
+    // =====================================================
+    const GOOGLE_SHEET_WEBAPP_URL =
+        "https://script.google.com/macros/s/AKfycbxox6Bm3lLwgtEP3rbqxiTzuMUcmApAOE0kdHnfptELVxuro4ULc4IN94ulMzAsMqcB/exec";
+
+    async function sendResultToGoogleSheet(durationSec) {
+        const level1FirstCorrect = studentLogs.slice(0, 5)
+            .filter(l => l && l.isFirstTryCorrect).length;
+
+        const level2FirstCorrect = studentLogs.slice(5, 10)
+            .filter(l => l && l.isFirstTryCorrect).length;
+
+        const digitalTP3 =
+            (level1FirstCorrect >= 2 ? 1 : 0) +
+            (level2FirstCorrect >= 2 ? 1 : 0);
+
+        const aiHelp = studentLogs
+            .filter(l => l && l.neededHelper).length;
+
+        const payload = {
+            name: playerData.name,
+            nama: playerData.name,
+            className: playerData.classInfo,
+            kelas: playerData.classInfo,
+            operation: "Bahagi",
+            operasi: "Bahagi",
+
+            preL1: "",
+            preL1TP: "",
+            preL2: "",
+            preL2TP: "",
+            preTP3: "",
+
+            digitalL1: level1FirstCorrect,
+            digitalL1TP: level1FirstCorrect >= 2 ? "TP3" : "Belum TP3",
+
+            digitalL2: level2FirstCorrect,
+            digitalL2TP: level2FirstCorrect >= 2 ? "TP3" : "Belum TP3",
+
+            digitalTP3: digitalTP3 + "/2",
+
+            aiHelp: aiHelp,
+
+            digitalTime: durationSec + " 秒",
+            masa: durationSec + " 秒",
+
+            postL1: "",
+            postL1TP: "",
+            postL2: "",
+            postL2TP: "",
+            postTP3: ""
+        };
+
+        try {
+            await fetch(GOOGLE_SHEET_WEBAPP_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: {
+                    "Content-Type": "text/plain;charset=UTF-8"
+                },
+                body: JSON.stringify(payload)
+            });
+            return true;
+        } catch (error) {
+            console.error("Google Sheet error:", error);
+            return false;
+        }
+    }
+
+
+    // 完成游戏，渲染成绩报告单
+    function finishGame() {
+        const endTime = new Date();
+        const durationSec = Math.round((endTime - startTime) / 1000);
+        const firstTryCorrectCount = studentLogs.filter(l => l && l.isFirstTryCorrect).length;
+        const accuracy = Math.round((firstTryCorrectCount / divQuestions.length) * 100);
+
+        document.getElementById('rep-name').innerText = playerData.name;
+        document.getElementById('rep-class').innerText = playerData.classInfo;
+        document.getElementById('rep-date').innerText = endTime.toLocaleDateString() + " " + endTime.toLocaleTimeString();
+        document.getElementById('rep-time').innerText = `${Math.floor(durationSec / 60)}分${durationSec % 60}秒`;
+        document.getElementById('rep-score').innerText = playerData.score;
+        document.getElementById('rep-accuracy').innerText = `${accuracy}% (${firstTryCorrectCount}/${divQuestions.length})`;
+
+        // 评语判断
+        let comment = "表现完美！除法算理清晰，能够独立迅速解答！";
+        if (accuracy < 60) comment = "基础尚需巩固，建议多配合 Level 2 竖式分步推演练习！";
+        else if (accuracy < 90) comment = "表现良好！但在两位数试商时偶有失误，保持专注！";
+        document.getElementById('rep-comment').innerText = comment;
+
+        // 生成表格
+        let tableHtml = '';
+        studentLogs.forEach(log => {
+            if(!log) return;
+            tableHtml += `<tr>
+                <td>${log.qIndex}</td>
+                <td>${log.question}</td>
+                <td>${log.correctAns}</td>
+                <td style="color:${log.isFirstTryCorrect ? 'green' : 'red'}; font-weight:bold;">${log.firstTry}</td>
+                <td>${log.neededHelper ? '🟡 使用竖式助手' : '🟢 独立完成'}</td>
+            </tr>`;
+        });
+        document.getElementById('rep-table-body').innerHTML = tableHtml;
+
+        // 保存成绩至浏览器本地存储
+        let history = JSON.parse(localStorage.getItem('math_escape_history') || '[]');
+        history.push({
+            name: playerData.name,
+            classInfo: playerData.classInfo,
+            score: playerData.score,
+            accuracy: accuracy,
+            date: new Date().toLocaleDateString()
+        });
+        localStorage.setItem('math_escape_history', JSON.stringify(history));
+
+        showScreen('screen-report');
+
+        // 自动发送成绩到 Google Sheet
+        const reportCard = document.getElementById('report-card');
+        const oldStatus = document.getElementById('sheet-status');
+        if (oldStatus) oldStatus.remove();
+
+        const sheetStatus = document.createElement('div');
+        sheetStatus.id = 'sheet-status';
+        sheetStatus.style.cssText =
+            'margin-top:10px;padding:10px;border-radius:10px;' +
+            'background:#006633;color:#fff;text-align:center;font-weight:900;';
+        sheetStatus.innerText = '📤 正在发送成绩到 Google Sheet...';
+        reportCard.appendChild(sheetStatus);
+
+        sendResultToGoogleSheet(durationSec).then(function(success) {
+            if (success) {
+                sheetStatus.innerText = '✅ 成绩已发送到 Google Sheet';
+            } else {
+                sheetStatus.innerText = '⚠️ Google Sheet 发送失败，请检查 Apps Script';
+                sheetStatus.style.background = '#8b2200';
+            }
+        });
+    }
+</script>
+</body>
+</html>
