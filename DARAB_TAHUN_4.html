@@ -1,672 +1,1030 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>🏰 数学逃脱密室 - 四年级乘法</title>
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>🎮 四年级数学乘法 · DME</title>
 
 <style>
+
 :root{
-    --bg:#101d3b;
-    --card:#182a52;
-    --cyan:#00f0ff;
-    --yellow:#ffea00;
+    --bg:#0b1838;
+    --card:#10254d;
+    --blue:#008cff;
+    --cyan:#00eaff;
     --green:#00ff66;
-    --pink:#ff2a8d;
-    --white:#fff;
+    --yellow:#ffd900;
+    --red:#ff5555;
+    --white:#ffffff;
 }
 
 *{
     box-sizing:border-box;
-    margin:0;
-    padding:0;
 }
 
 body{
-    font-family:"Microsoft YaHei","Segoe UI",sans-serif;
-    background:linear-gradient(135deg,#101d3b,#3159a5);
-    color:var(--white);
+    margin:0;
     min-height:100vh;
-    padding:15px;
+    font-family:
+        "Noto Sans SC",
+        "Microsoft YaHei",
+        Arial,
+        sans-serif;
+
+    background:
+        linear-gradient(
+            135deg,
+            #07152f,
+            #102a57,
+            #07152f
+        );
+
+    color:var(--white);
 }
 
-#app{
-    width:100%;
+.container{
+    width:95%;
     max-width:1000px;
-    min-height:720px;
-    margin:auto;
-    background:rgba(15,25,55,.97);
-    border:4px solid var(--cyan);
-    border-radius:28px;
-    box-shadow:0 0 30px rgba(0,240,255,.45);
-    overflow:hidden;
+    margin:30px auto;
+}
+
+.card{
+    background:
+        linear-gradient(
+            145deg,
+            rgba(20,48,95,.98),
+            rgba(7,25,60,.98)
+        );
+
+    border:2px solid var(--cyan);
+
+    border-radius:24px;
+
+    padding:30px;
+
+    box-shadow:
+        0 0 25px rgba(0,234,255,.18);
+}
+
+h1{
+    text-align:center;
+    color:var(--yellow);
+    margin-top:0;
+}
+
+h2{
+    text-align:center;
+}
+
+.subtitle{
+    text-align:center;
+    color:#cde7ff;
+    margin-bottom:25px;
+}
+
+.input-group{
+    margin:15px 0;
+}
+
+label{
+    display:block;
+    font-weight:bold;
+    margin-bottom:8px;
+    font-size:18px;
+}
+
+input,
+select{
+    width:100%;
+    padding:14px;
+    border-radius:12px;
+    border:2px solid #2279c9;
+    background:#071a3c;
+    color:white;
+    font-size:17px;
+}
+
+button{
+    border:none;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.main-btn{
+    width:100%;
+    padding:16px;
+    margin-top:20px;
+
+    border-radius:14px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #007a3d,
+            #00b85a
+        );
+
+    color:white;
+
+    font-size:20px;
+
+    box-shadow:
+        0 5px 15px rgba(0,0,0,.25);
+}
+
+.main-btn:hover{
+    transform:scale(1.01);
 }
 
 .screen{
     display:none;
-    padding:28px;
 }
 
 .screen.active{
     display:block;
 }
 
-h1{
-    text-align:center;
-    color:var(--yellow);
-    font-size:42px;
-    margin:20px 0 30px;
-    text-shadow:3px 3px #000;
-}
+.hud{
+    display:grid;
+    grid-template-columns:
+        repeat(3,1fr);
 
-h2{
-    text-align:center;
+    gap:10px;
+
     margin-bottom:20px;
 }
 
-.input-box{
-    max-width:600px;
-    margin:auto;
-}
-
-label{
-    display:block;
-    margin:15px 0 6px;
-    font-size:20px;
-    font-weight:bold;
-}
-
-input,select{
-    width:100%;
-    padding:14px;
+.hud-box{
+    background:#071a3c;
+    border:1px solid #1769b1;
     border-radius:12px;
-    border:3px solid var(--cyan);
+    padding:12px;
+    text-align:center;
+}
+
+.hud-value{
+    color:var(--yellow);
     font-size:20px;
-    background:#fff;
-    color:#111;
-}
-
-button{
-    cursor:pointer;
-}
-
-.main-btn{
-    display:block;
-    width:100%;
-    margin-top:25px;
-    padding:16px;
-    border:3px solid white;
-    border-radius:18px;
-    background:linear-gradient(#00ff66,#009933);
-    color:white;
-    font-size:24px;
-    font-weight:bold;
-    box-shadow:0 6px #005522;
-}
-
-.main-btn:active{
-    transform:translateY(4px);
-    box-shadow:0 2px #005522;
-}
-
-.hud{
-    display:flex;
-    justify-content:space-between;
-    gap:10px;
-    flex-wrap:wrap;
-    background:#ff0055;
-    border:3px solid var(--yellow);
-    border-radius:16px;
-    padding:12px 18px;
-    font-size:19px;
     font-weight:bold;
 }
 
 .level-bar{
-    margin:15px 0;
-    background:#087be8;
-    border:3px solid white;
-    border-radius:14px;
-    padding:12px;
     display:flex;
     justify-content:space-between;
+    align-items:center;
+
+    background:#071a3c;
+
+    padding:14px 18px;
+
+    border-radius:12px;
+
+    border:1px solid #1769b1;
+
+    margin-bottom:20px;
+}
+
+.level-name{
+    color:#55ff9a;
     font-size:20px;
     font-weight:bold;
 }
 
-.question{
-    background:linear-gradient(#ff0055,#a50035);
-    border:4px solid var(--yellow);
-    border-radius:22px;
+.question-card{
+    background:#081b40;
+    border:2px solid #1769b1;
+    border-radius:20px;
     padding:25px;
     text-align:center;
-    margin-bottom:20px;
 }
 
-.question-text{
-    font-size:42px;
-    font-weight:900;
-    text-shadow:3px 3px #000;
+.question{
+    font-size:34px;
+    font-weight:bold;
+    margin:20px 0 30px;
+    color:white;
 }
 
 .options{
     display:grid;
-    grid-template-columns:1fr 1fr;
+    grid-template-columns:
+        repeat(2,1fr);
+
     gap:15px;
 }
 
 .option{
-    background:linear-gradient(#00eaff,#087be8);
-    border:3px solid white;
-    border-radius:18px;
     padding:18px;
+
+    border-radius:14px;
+
+    background:#12376d;
+
+    border:2px solid #267bc5;
+
     color:white;
-    font-size:28px;
-    font-weight:bold;
-    text-shadow:2px 2px #000;
-    box-shadow:0 6px #034a9c;
+
+    font-size:22px;
+
+    transition:.15s;
 }
 
-.option:active{
-    transform:translateY(4px);
-    box-shadow:0 2px #034a9c;
+.option:hover{
+    background:#1a4d8f;
+    transform:scale(1.02);
 }
 
-.ai{
+.ai-box{
     margin-top:20px;
-    background:#101d35;
-    border:3px solid var(--cyan);
-    border-radius:18px;
-    padding:18px;
-    text-align:center;
+
+    background:
+        linear-gradient(
+            135deg,
+            #162f61,
+            #0b2048
+        );
+
+    border:2px solid #7b9cff;
+
+    border-radius:16px;
+
+    padding:20px;
+
+    display:none;
 }
 
 .ai-title{
-    font-size:23px;
     color:var(--yellow);
+    font-size:20px;
     font-weight:bold;
+    margin-bottom:10px;
 }
 
 .ai-message{
-    margin-top:10px;
-    font-size:19px;
+    line-height:1.7;
 }
 
 .vertical{
-    display:none;
     margin-top:15px;
-    padding:18px;
-    background:#182d59;
-    border:2px dashed var(--cyan);
-    border-radius:15px;
+
+    background:#071832;
+
+    border-radius:12px;
+
+    padding:15px;
+
+    font-family:monospace;
+
+    font-size:20px;
+
+    white-space:pre-line;
+
+    color:#9ee7ff;
 }
 
-.vertical.show{
-    display:block;
+.stage-card{
+    text-align:center;
+
+    background:#081b40;
+
+    border-radius:18px;
+
+    padding:30px;
+
+    border:2px solid #2478c7;
 }
 
-.sum{
+.stage-score{
     font-size:32px;
-    font-weight:bold;
     color:var(--yellow);
-    margin:15px;
+    margin:20px 0;
 }
 
 .report{
-    max-width:750px;
-    margin:auto;
-    background:#101d35;
-    border:3px solid var(--cyan);
-    border-radius:20px;
-    padding:20px;
+    margin-top:20px;
 }
 
-.report-row{
+.report-item{
     display:flex;
     justify-content:space-between;
-    gap:20px;
-    padding:14px 5px;
-    border-bottom:2px dashed #087be8;
-    font-size:20px;
+
+    padding:15px 5px;
+
+    border-bottom:
+        1px dashed #2478c7;
+
+    gap:15px;
 }
 
-.report-row strong{
+.report-item strong{
     color:var(--yellow);
+    text-align:right;
 }
 
 .success{
     margin-top:20px;
-    padding:15px;
+
+    padding:18px;
+
     border-radius:15px;
+
     background:#006633;
+
     text-align:center;
-    font-size:20px;
-    font-weight:bold;
+
+    color:white;
+
+    font-size:18px;
 }
 
-.error{
-    background:#8b2200;
+.fail{
+    margin-top:20px;
+
+    padding:18px;
+
+    border-radius:15px;
+
+    background:#773300;
+
+    text-align:center;
+
+    color:white;
+
+    font-size:18px;
 }
 
 .small{
     text-align:center;
+    color:#9fc9ee;
     margin-top:20px;
-    color:#ddd;
 }
 
-@media(max-width:650px){
-    h1{font-size:30px}
-    .question-text{font-size:32px}
-    .options{grid-template-columns:1fr}
-    .option{font-size:24px}
-    .hud{font-size:16px}
-    .report-row{font-size:16px}
+@media(max-width:700px){
+
+    .container{
+        width:96%;
+        margin:15px auto;
+    }
+
+    .card{
+        padding:18px;
+    }
+
+    .hud{
+        grid-template-columns:1fr;
+    }
+
+    .options{
+        grid-template-columns:1fr;
+    }
+
+    .question{
+        font-size:27px;
+    }
+
 }
+
 </style>
+
 </head>
+
 
 <body>
 
-<div id="app">
 
-<!-- =========================
+<div class="container">
+
+<div class="card">
+
+
+<!-- =====================================================
      首页
-========================= -->
+===================================================== -->
 
-<section id="home" class="screen active">
+<section id="startScreen" class="screen active">
 
-<h1>🏰 数学逃脱密室</h1>
+<h1>
+🎮 数学逃脱密室
+</h1>
 
-<h2>四年级数学 · 乘法特别版</h2>
+<h2>
+四年级数学 · 乘法
+</h2>
 
-<div class="input-box">
+<p class="subtitle">
+DME Digital Math Empowerment
+<br>
+AI 智能分层学习
+</p>
 
-<label>👤 学生姓名</label>
-<input id="name" placeholder="请输入学生姓名">
 
-<label>🏫 学校</label>
-<input id="school" placeholder="请输入学校名称">
+<div class="input-group">
 
-<label>📚 班级</label>
-<input id="className" placeholder="例如：4仁班">
+<label>
+👤 学生姓名
+</label>
 
-<label>🔊 语音</label>
-<select id="voice">
-<option value="female">👩‍🏫 女老师</option>
-<option value="male">👨‍🏫 男老师</option>
-</select>
-
-<button class="main-btn" onclick="startGame()">
-🚀 开始数学挑战
-</button>
+<input
+id="studentName"
+type="text"
+placeholder="请输入学生姓名">
 
 </div>
+
+
+<div class="input-group">
+
+<label>
+🏫 学校
+</label>
+
+<input
+id="schoolName"
+type="text"
+placeholder="请输入学校名称"
+value="SJKC">
+
+</div>
+
+
+<div class="input-group">
+
+<label>
+📚 班级
+</label>
+
+<input
+id="className"
+type="text"
+placeholder="例如：4仁班">
+
+</div>
+
+
+<button
+class="main-btn"
+onclick="startGame()">
+
+🚀 开始数学挑战
+
+</button>
+
 
 <p class="small">
-四年级数学 · 乘法 · AI分层学习
+
+四年级数学 · 乘法 · AI 分层学习
+
 </p>
 
 </section>
 
 
-<!-- =========================
-     游戏
-========================= -->
 
-<section id="game" class="screen">
+<!-- =====================================================
+     游戏
+===================================================== -->
+
+<section id="gameScreen" class="screen">
+
 
 <div class="hud">
-<span>👤 <span id="hudName"></span></span>
-<span>⭐ <span id="score">0</span></span>
-<span>🤖 AI帮助：<span id="aiCount">0</span></span>
+
+<div class="hud-box">
+
+<div>👤 学生</div>
+
+<div
+class="hud-value"
+id="hudName">
+-
 </div>
+
+</div>
+
+
+<div class="hud-box">
+
+<div>⭐ 得分</div>
+
+<div
+class="hud-value"
+id="score">
+0
+</div>
+
+</div>
+
+
+<div class="hud-box">
+
+<div>🤖 AI帮助</div>
+
+<div
+class="hud-value"
+id="aiCount">
+0
+</div>
+
+</div>
+
+</div>
+
 
 <div class="level-bar">
-<span id="levelName">Level 1</span>
-<span id="questionNo">1 / 5</span>
+
+<div
+class="level-name"
+id="levelName">
+
+🟢 Level 1
+
 </div>
 
-<div class="question">
-<div id="question" class="question-text">
+<div id="questionNumber">
+
+1 / 5
+
+</div>
+
+</div>
+
+
+<div class="question-card">
+
+
+<div
+id="question"
+class="question">
+
 题目
-</div>
-</div>
 
-<div id="options" class="options"></div>
-
-<div class="ai">
-
-<div id="aiTitle" class="ai-title">
-🟢 Level 1：独立挑战
 </div>
 
-<div id="aiMessage" class="ai-message">
-请先自己计算，再选择答案！
+
+<div
+id="options"
+class="options">
 </div>
 
-<div id="vertical" class="vertical">
 
-<strong>🧮 AI竖式辅助</strong>
+<div
+id="aiBox"
+class="ai-box">
 
-<div class="sum" id="verticalText"></div>
+<div
+class="ai-title"
+id="aiTitle">
+
+🤖 AI 学习助手
+
+</div>
+
+
+<div
+class="ai-message"
+id="aiMessage">
+
+请先独立思考。
+
+</div>
+
+
+<div
+id="vertical"
+class="vertical">
+</div>
+
+</div>
+
+
+</div>
+
+
+</section>
+
+
+
+<!-- =====================================================
+     Level 完成
+===================================================== -->
+
+<section
+id="stageScreen"
+class="screen">
+
+
+<div class="stage-card">
+
+<h1>
+🔑 Level 完成！
+</h1>
+
 
 <p>
-提示：先计算个位，再计算十位，最后相加。
+恭喜你完成这一关！
 </p>
 
-</div>
+
+<div
+class="stage-score"
+id="stageScore">
+
+5 / 5
 
 </div>
 
-</section>
 
+<div id="stageAI">
 
-<!-- =========================
-     过关
-========================= -->
-
-<section id="stageComplete" class="screen">
-
-<h1>🔑 Level 1 完成！</h1>
-
-<h2>你已经获得钥匙！</h2>
-
-<div class="report">
-
-<div class="report-row">
-<span>首次答对</span>
-<strong id="stage1Result"></strong>
-</div>
-
-<div class="report-row">
-<span>AI辅助</span>
-<strong id="stage1AI"></strong>
-</div>
+🤖 AI辅助：0 次
 
 </div>
 
-<button class="main-btn" onclick="nextStage()">
-🚪 进入 Level 2
+
+<button
+class="main-btn"
+onclick="nextStage()">
+
+🚪 进入下一关
+
 </button>
 
+</div>
+
 </section>
 
 
-<!-- =========================
-     报告
-========================= -->
 
-<section id="report" class="screen">
+<!-- =====================================================
+     最终报告
+===================================================== -->
 
-<h1>🏆 AI 分层学习诊断报告</h1>
+<section
+id="reportScreen"
+class="screen">
 
-<div id="reportContent" class="report"></div>
 
-<button class="main-btn" onclick="location.reload()">
+<h1>
+🏆 学习完成！
+</h1>
+
+
+<div
+id="report"
+class="report">
+</div>
+
+
+<div
+id="sheetStatus"
+class="success">
+
+📤 正在发送成绩到 Google Sheet...
+
+</div>
+
+
+<button
+class="main-btn"
+onclick="location.reload()">
+
 🔄 再玩一次
+
 </button>
+
 
 </section>
 
+
 </div>
+
+</div>
+
 
 
 <script>
 
-/* =====================================================
-   四年级 Apps Script Web App
-===================================================== */
+
+// =====================================================
+// GOOGLE APPS SCRIPT WEB APP
+// 四年级乘法
+// =====================================================
 
 const GOOGLE_SHEET_WEBAPP_URL =
 "https://script.google.com/macros/s/AKfycbxox6Bm3lLwgtEP3rbqxiTzuMUcmApAOE0kdHnfptELVxuro4ULc4IN94ulMzAsMqcB/exec";
 
 
-/* =====================================================
-   乘法题库
-===================================================== */
+// =====================================================
+// 学生资料
+// =====================================================
+
+let playerData = {
+
+    name:"",
+    school:"",
+    className:""
+
+};
+
+
+// =====================================================
+// 游戏资料
+// =====================================================
+
+let currentStage = 1;
+
+let currentQuestionIndex = 0;
+
+let currentQuestion = null;
+
+let stageQuestions = [];
+
+let wrongAttempts = 0;
+
+let stage1FirstCorrect = 0;
+
+let stage2FirstCorrect = 0;
+
+let totalFirstCorrect = 0;
+
+let totalAnswered = 0;
+
+let aiHelpCount = 0;
+
+let score = 0;
+
+let startTime = null;
+
+let endTime = null;
+
+let sending = false;
+
+
+// =====================================================
+// 四年级乘法题库
+//
+// Level 1：基础乘法
+// Level 2：较高难度乘法
+//
+// 每关 5 题
+// =====================================================
 
 const questionBank = {
 
-level1:[
+
+stage1: [
+
     {
-        q:"142 × 3 = ?",
-        a:426,
-        opts:[426,416,436,326]
+        q:"24 × 3 = ?",
+        a:72,
+        opts:[72,62,82,76]
     },
+
     {
-        q:"214 × 4 = ?",
-        a:856,
-        opts:[856,846,816,866]
+        q:"36 × 4 = ?",
+        a:144,
+        opts:[134,144,154,164]
     },
+
     {
-        q:"308 × 5 = ?",
-        a:1540,
-        opts:[1540,1500,1530,1640]
+        q:"125 × 4 = ?",
+        a:500,
+        opts:[400,450,500,550]
     },
+
     {
-        q:"520 × 6 = ?",
-        a:3120,
-        opts:[3120,3100,3220,3020]
+        q:"213 × 3 = ?",
+        a:639,
+        opts:[629,639,649,659]
     },
+
     {
-        q:"413 × 7 = ?",
-        a:2891,
-        opts:[2891,2881,2821,2991]
+        q:"324 × 2 = ?",
+        a:648,
+        opts:[638,648,658,668]
     }
+
 ],
 
-level2:[
+
+stage2: [
+
     {
-        q:"34 × 21 = ?",
-        a:714,
-        opts:[714,724,614,704]
+        q:"42 × 12 = ?",
+        a:504,
+        opts:[494,504,514,524]
     },
+
     {
-        q:"23 × 12 = ?",
-        a:276,
-        opts:[276,266,286,256]
+        q:"125 × 16 = ?",
+        a:2000,
+        opts:[1800,1900,2000,2100]
     },
+
     {
-        q:"45 × 16 = ?",
-        a:720,
-        opts:[720,710,730,680]
+        q:"234 × 15 = ?",
+        a:3510,
+        opts:[3410,3510,3610,3710]
     },
+
     {
-        q:"52 × 34 = ?",
-        a:1768,
-        opts:[1768,1758,1778,1668]
+        q:"325 × 24 = ?",
+        a:7800,
+        opts:[7600,7700,7800,7900]
     },
+
     {
-        q:"68 × 45 = ?",
-        a:3060,
-        opts:[3060,3050,2960,3160]
+        q:"412 × 25 = ?",
+        a:10300,
+        opts:[9300,10000,10300,11300]
     }
+
 ]
 
 };
 
 
-/* =====================================================
-   学生资料
-===================================================== */
-
-let student = {
-    name:"",
-    school:"",
-    className:""
-};
-
-
-/* =====================================================
-   游戏资料
-===================================================== */
-
-let currentLevel = 1;
-let currentIndex = 0;
-
-let currentQuestion = null;
-
-let wrongAttempts = 0;
-
-let startTime = null;
-let endTime = null;
-
-let score = 0;
-
-let aiHelpCount = 0;
-
-let level1FirstCorrect = 0;
-let level2FirstCorrect = 0;
-
-let totalAnswered = 0;
-
-
-/* =====================================================
-   切换页面
-===================================================== */
-
-function showScreen(id){
-
-    document
-        .querySelectorAll(".screen")
-        .forEach(el=>{
-            el.classList.remove("active");
-        });
-
-    document
-        .getElementById(id)
-        .classList.add("active");
-}
-
-
-/* =====================================================
-   开始游戏
-===================================================== */
+// =====================================================
+// 开始游戏
+// =====================================================
 
 function startGame(){
 
-    student.name =
+    playerData.name =
         document
-        .getElementById("name")
+        .getElementById("studentName")
         .value
         .trim();
 
-    student.school =
+    playerData.school =
         document
-        .getElementById("school")
+        .getElementById("schoolName")
         .value
         .trim();
 
-    student.className =
+    playerData.className =
         document
         .getElementById("className")
         .value
         .trim();
 
 
-    if(!student.name){
+    if(!playerData.name){
 
-        alert("请输入学生姓名！");
+        alert("请输入学生姓名。");
+
         return;
 
     }
 
 
-    if(!student.className){
+    if(!playerData.className){
 
-        alert("请输入班级！");
+        alert("请输入班级。");
+
         return;
 
     }
 
 
-    document
-        .getElementById("hudName")
-        .innerText =
-        student.name;
+    currentStage = 1;
 
+    currentQuestionIndex = 0;
 
-    currentLevel = 1;
-    currentIndex = 0;
+    stage1FirstCorrect = 0;
 
-    wrongAttempts = 0;
+    stage2FirstCorrect = 0;
 
-    score = 0;
+    totalFirstCorrect = 0;
+
+    totalAnswered = 0;
 
     aiHelpCount = 0;
 
-    level1FirstCorrect = 0;
-    level2FirstCorrect = 0;
+    score = 0;
 
-    totalAnswered = 0;
+    sending = false;
 
     startTime = new Date();
 
 
-    showScreen("game");
+    document
+    .getElementById("hudName")
+    .innerText =
+        playerData.name;
+
+
+    document
+    .getElementById("score")
+    .innerText =
+        "0";
+
+
+    document
+    .getElementById("aiCount")
+    .innerText =
+        "0";
+
+
+    showScreen("gameScreen");
+
+
+    loadStage(1);
+
+}
+
+
+// =====================================================
+// 显示页面
+// =====================================================
+
+function showScreen(id){
+
+    document
+    .querySelectorAll(".screen")
+    .forEach(function(screen){
+
+        screen.classList.remove("active");
+
+    });
+
+
+    document
+    .getElementById(id)
+    .classList.add("active");
+
+}
+
+
+// =====================================================
+// 加载 Level
+// =====================================================
+
+function loadStage(stage){
+
+    currentStage = stage;
+
+    currentQuestionIndex = 0;
+
+    wrongAttempts = 0;
+
+    stageQuestions =
+        questionBank[
+            "stage" + stage
+        ];
+
+    document
+    .getElementById("levelName")
+    .innerText =
+        stage === 1
+        ? "🟢 Level 1：基础挑战"
+        : "🟡 Level 2：进阶挑战";
+
 
     loadQuestion();
 
 }
 
 
-/* =====================================================
-   载入题目
-===================================================== */
+// =====================================================
+// 加载题目
+// =====================================================
 
 function loadQuestion(){
 
-    const list =
-        currentLevel === 1
-        ? questionBank.level1
-        : questionBank.level2;
-
-
-    currentQuestion =
-        list[currentIndex];
-
-
     wrongAttempts = 0;
 
-
-    document
-        .getElementById("levelName")
-        .innerText =
-        currentLevel === 1
-        ? "🟢 Level 1：基础乘法"
-        : "🟡 Level 2：进阶乘法";
+    currentQuestion =
+        stageQuestions[
+            currentQuestionIndex
+        ];
 
 
     document
-        .getElementById("questionNo")
-        .innerText =
-        (currentIndex + 1) +
-        " / 5";
+    .getElementById("questionNumber")
+    .innerText =
+        (
+            currentQuestionIndex + 1
+        ) +
+        " / " +
+        stageQuestions.length;
 
 
     document
-        .getElementById("question")
-        .innerText =
+    .getElementById("question")
+    .innerText =
         currentQuestion.q;
 
 
     document
-        .getElementById("vertical")
-        .classList.remove("show");
-
-
-    document
-        .getElementById("aiTitle")
-        .innerText =
-        currentLevel === 1
-        ? "🟢 Level 1：独立挑战"
-        : "🟡 Level 2：进阶挑战";
-
-
-    document
-        .getElementById("aiMessage")
-        .innerText =
-        "请先自己计算，再选择答案！";
+    .getElementById("aiBox")
+    .style.display =
+        "none";
 
 
     renderOptions();
@@ -674,109 +1032,139 @@ function loadQuestion(){
 }
 
 
-/* =====================================================
-   答案选项
-===================================================== */
+// =====================================================
+// 选择答案
+// =====================================================
 
 function renderOptions(){
 
-    const container =
-        document
-        .getElementById("options");
+    const box =
+        document.getElementById(
+            "options"
+        );
 
 
-    container.innerHTML = "";
+    box.innerHTML = "";
 
 
     const shuffled =
         [...currentQuestion.opts]
         .sort(
-            ()=>Math.random()-0.5
+            () =>
+                Math.random() -
+                0.5
         );
 
 
-    shuffled.forEach(
-        (option,index)=>{
+    shuffled.forEach(function(answer){
 
-            const btn =
-                document
-                .createElement("button");
-
-
-            btn.className =
-                "option";
+        const button =
+            document.createElement(
+                "button"
+            );
 
 
-            btn.innerText =
-                String.fromCharCode(65+index)
-                + ". "
-                + option;
+        button.className =
+            "option";
 
 
-            btn.onclick =
-                ()=>answer(
-                    option
+        button.innerText =
+            answer;
+
+
+        button.onclick =
+            function(){
+
+                checkAnswer(
+                    answer
                 );
 
+            };
 
-            container.appendChild(btn);
 
-        }
-    );
+        box.appendChild(
+            button
+        );
+
+    });
 
 }
 
 
-/* =====================================================
-   答题
-===================================================== */
+// =====================================================
+// 检查答案
+// =====================================================
 
-function answer(value){
+function checkAnswer(answer){
 
     totalAnswered++;
 
 
-    if(value === currentQuestion.a){
+    if(
+        answer ===
+        currentQuestion.a
+    ){
 
-        score += 10;
+        // =============================================
+        // 首次答对
+        // =============================================
+
+        if(
+            wrongAttempts === 0
+        ){
+
+            totalFirstCorrect++;
 
 
-        if(wrongAttempts === 0){
+            if(
+                currentStage === 1
+            ){
 
-            if(currentLevel === 1){
+                stage1FirstCorrect++;
 
-                level1FirstCorrect++;
+            }
+            else{
 
-            }else{
-
-                level2FirstCorrect++;
+                stage2FirstCorrect++;
 
             }
 
         }
 
 
+        score += 10;
+
+
         document
-            .getElementById("score")
-            .innerText =
+        .getElementById("score")
+        .innerText =
             score;
 
 
-        currentIndex++;
+        currentQuestionIndex++;
 
 
-        if(currentIndex >= 5){
-
-            finishLevel();
-
-        }else{
+        if(
+            currentQuestionIndex <
+            stageQuestions.length
+        ){
 
             loadQuestion();
 
         }
+        else{
+
+            finishStage();
+
+        }
 
 
-    }else{
+    }
+    else{
+
+        // =============================================
+        // 答错 → AI辅助
+        // =============================================
 
         wrongAttempts++;
 
@@ -784,112 +1172,200 @@ function answer(value){
 
 
         document
-            .getElementById("aiCount")
-            .innerText =
+        .getElementById("aiCount")
+        .innerText =
             aiHelpCount;
 
 
-        showAIHelp();
+        showAI();
+
 
     }
 
 }
 
 
-/* =====================================================
-   AI 分层辅助
-===================================================== */
+// =====================================================
+// AI 辅助
+// =====================================================
 
-function showAIHelp(){
-
-    if(wrongAttempts === 1){
-
-        document
-            .getElementById("aiTitle")
-            .innerText =
-            "🤖 Level 2：AI提示";
-
-
-        document
-            .getElementById("aiMessage")
-            .innerText =
-            "再检查一次个位和进位，慢慢计算。";
-
-    }
-
-
-    if(wrongAttempts >= 2){
-
-        document
-            .getElementById("aiTitle")
-            .innerText =
-            "🤖 AI竖式辅助";
-
-
-        document
-            .getElementById("aiMessage")
-            .innerText =
-            "我来帮助你观察乘法的位值。";
-
-
-        showVertical();
-
-    }
-
-}
-
-
-/* =====================================================
-   显示竖式
-===================================================== */
-
-function showVertical(){
+function showAI(){
 
     const box =
-        document
-        .getElementById("vertical");
+        document.getElementById(
+            "aiBox"
+        );
 
 
-    const question =
-        currentQuestion.q;
+    box.style.display =
+        "block";
+
+
+    const message =
+        document.getElementById(
+            "aiMessage"
+        );
+
+
+    const vertical =
+        document.getElementById(
+            "vertical"
+        );
+
+
+    if(
+        wrongAttempts === 1
+    ){
+
+        message.innerText =
+            "💡 再想一想：可以把乘法看成相同数量的重复加法。";
+
+        vertical.innerText =
+            "例如：24 × 3\n\n" +
+            "24 + 24 + 24\n" +
+            "= 72";
+
+    }
+    else{
+
+        message.innerText =
+            "🤖 AI提示：我们一步一步计算。先算个位，再算十位，最后把结果相加。";
+
+
+        const n1 =
+            getNumber1(
+                currentQuestion
+            );
+
+
+        const n2 =
+            getNumber2(
+                currentQuestion
+            );
+
+
+        vertical.innerText =
+            n1 +
+            " × " +
+            n2 +
+            "\n\n" +
+            "请重新计算，再选择答案。";
+
+    }
+
+}
+
+
+// =====================================================
+// 从题目文字取得数字
+// =====================================================
+
+function getNumber1(question){
+
+    const numbers =
+        question.q
+        .replace(/,/g,"")
+        .match(/\d+/g);
+
+
+    return numbers
+        ? Number(numbers[0])
+        : 0;
+
+}
+
+
+function getNumber2(question){
+
+    const numbers =
+        question.q
+        .replace(/,/g,"")
+        .match(/\d+/g);
+
+
+    return numbers
+        ? Number(numbers[1])
+        : 0;
+
+}
+
+
+// =====================================================
+// Level 完成
+// =====================================================
+
+function finishStage(){
+
+    const result =
+        currentStage === 1
+        ? stage1FirstCorrect
+        : stage2FirstCorrect;
 
 
     document
-        .getElementById("verticalText")
+    .getElementById("stageScore")
+    .innerText =
+        result +
+        " / 5";
+
+
+    document
+    .getElementById("stageAI")
+    .innerText =
+        "🤖 AI辅助：" +
+        aiHelpCount +
+        " 次";
+
+
+    if(
+        currentStage === 1
+    ){
+
+        document
+        .querySelector(
+            "#stageScreen .main-btn"
+        )
         .innerText =
-        question.replace(" = ?","");
+            "🚪 进入 Level 2";
+
+    }
+    else{
+
+        document
+        .querySelector(
+            "#stageScreen .main-btn"
+        )
+        .innerText =
+            "🏆 查看学习报告";
+
+    }
 
 
-    box.classList.add("show");
+    showScreen(
+        "stageScreen"
+    );
 
 }
 
 
-/* =====================================================
-   完成 Level
-===================================================== */
+// =====================================================
+// 下一关
+// =====================================================
 
-function finishLevel(){
+function nextStage(){
 
-    if(currentLevel === 1){
+    if(
+        currentStage === 1
+    ){
 
-        document
-            .getElementById("stage1Result")
-            .innerText =
-            level1FirstCorrect +
-            " / 5";
+        loadStage(2);
 
+        showScreen(
+            "gameScreen"
+        );
 
-        document
-            .getElementById("stage1AI")
-            .innerText =
-            aiHelpCount +
-            " 次";
-
-
-        showScreen("stageComplete");
-
-    }else{
+    }
+    else{
 
         showReport();
 
@@ -898,76 +1374,235 @@ function finishLevel(){
 }
 
 
-/* =====================================================
-   Level 2
-===================================================== */
+// =====================================================
+// 最终报告
+// =====================================================
 
-function nextStage(){
+function showReport(){
 
-    currentLevel = 2;
-
-    currentIndex = 0;
-
-    showScreen("game");
-
-    loadQuestion();
-
-}
+    endTime =
+        new Date();
 
 
-/* =====================================================
-   TP3
-===================================================== */
+    const duration =
+        Math.max(
+            1,
+            Math.round(
+                (
+                    endTime -
+                    startTime
+                ) / 1000
+            )
+        );
 
-function getTP3(score){
 
-    return Number(score) >= 2
+    const l1 =
+        stage1FirstCorrect;
+
+
+    const l2 =
+        stage2FirstCorrect;
+
+
+    const l1TP =
+        l1 >= 2
         ? "TP3"
-        : "Belum TP3";
-
-}
+        : "未达TP3";
 
 
-/* =====================================================
-   发送 Google Sheet
-===================================================== */
+    const l2TP =
+        l2 >= 2
+        ? "TP3"
+        : "未达TP3";
 
-async function sendDataToGoogleSheet(
-    duration
-){
 
     const digitalTP3 =
         (
-            level1FirstCorrect >= 2
+            l1 >= 2
             ? 1
             : 0
         )
         +
         (
-            level2FirstCorrect >= 2
+            l2 >= 2
             ? 1
             : 0
-        )
-        +
-        "/2";
+        );
+
+
+    const accuracy =
+        Math.round(
+            (
+                totalFirstCorrect /
+                10
+            ) * 100
+        );
+
+
+    document
+    .getElementById("report")
+    .innerHTML = `
+
+        <div class="report-item">
+
+            <span>👤 学生姓名：</span>
+
+            <strong>
+                ${playerData.name}
+            </strong>
+
+        </div>
+
+
+        <div class="report-item">
+
+            <span>🏫 学校：</span>
+
+            <strong>
+                ${playerData.school}
+            </strong>
+
+        </div>
+
+
+        <div class="report-item">
+
+            <span>📚 班级：</span>
+
+            <strong>
+                ${playerData.className}
+            </strong>
+
+        </div>
+
+
+        <div class="report-item">
+
+            <span>⏱ 答题时间：</span>
+
+            <strong>
+                ${duration} 秒
+            </strong>
+
+        </div>
+
+
+        <div class="report-item">
+
+            <span>🟢 Level 1 首次答对：</span>
+
+            <strong>
+                ${l1}/5 → ${l1TP}
+            </strong>
+
+        </div>
+
+
+        <div class="report-item">
+
+            <span>🟡 Level 2 首次答对：</span>
+
+            <strong>
+                ${l2}/5 → ${l2TP}
+            </strong>
+
+        </div>
+
+
+        <div class="report-item">
+
+            <span>🏆 Digital TP3：</span>
+
+            <strong>
+                ${digitalTP3}/2
+            </strong>
+
+        </div>
+
+
+        <div class="report-item">
+
+            <span>🎯 总首次答对：</span>
+
+            <strong>
+                ${totalFirstCorrect}/10
+                (${accuracy}%)
+            </strong>
+
+        </div>
+
+
+        <div class="report-item">
+
+            <span>🤖 AI辅助次数：</span>
+
+            <strong>
+                ${aiHelpCount}
+            </strong>
+
+        </div>
+
+    `;
+
+
+    showScreen(
+        "reportScreen"
+    );
+
+
+    sendToGoogleSheet(
+        duration
+    );
+
+}
+
+
+// =====================================================
+// 发送 Google Sheet
+// =====================================================
+
+async function sendToGoogleSheet(
+    duration
+){
+
+    if(sending){
+
+        return;
+
+    }
+
+
+    sending = true;
+
+
+    const status =
+        document
+        .getElementById(
+            "sheetStatus"
+        );
+
+
+    status.className =
+        "success";
+
+
+    status.innerText =
+        "📤 正在发送成绩到 Google Sheet...";
 
 
     const payload = {
 
         name:
-            student.name,
-
-        nama:
-            student.name,
-
-        className:
-            student.className,
-
-        kelas:
-            student.className,
+            playerData.name,
 
         school:
-            student.school,
+            playerData.school,
+
+        className:
+            playerData.className,
+
+        kelas:
+            playerData.className,
 
         operation:
             "Darab",
@@ -976,8 +1611,7 @@ async function sendDataToGoogleSheet(
             "Darab",
 
 
-        /* Pre-Test */
-
+        // Pre-Test
         preL1:"",
         preL1TP:"",
 
@@ -987,51 +1621,56 @@ async function sendDataToGoogleSheet(
         preTP3:"",
 
 
-        /* Digital Level 1 */
-
+        // Digital Level 1
         digitalL1:
-            level1FirstCorrect,
+            stage1FirstCorrect,
 
         digitalL1TP:
-            getTP3(
-                level1FirstCorrect
-            ),
+            stage1FirstCorrect >= 2
+            ? "TP3"
+            : "Belum TP3",
 
 
-        /* Digital Level 2 */
-
+        // Digital Level 2
         digitalL2:
-            level2FirstCorrect,
+            stage2FirstCorrect,
 
         digitalL2TP:
-            getTP3(
-                level2FirstCorrect
-            ),
+            stage2FirstCorrect >= 2
+            ? "TP3"
+            : "Belum TP3",
 
 
-        /* Digital TP3 */
-
+        // Digital TP3
         digitalTP3:
-            digitalTP3,
+            (
+                (
+                    stage1FirstCorrect >= 2
+                    ? 1
+                    : 0
+                )
+                +
+                (
+                    stage2FirstCorrect >= 2
+                    ? 1
+                    : 0
+                )
+            )
+            + "/2",
 
 
-        /* AI */
-
+        // AI
         aiHelp:
             aiHelpCount,
 
 
-        /* 时间 */
-
+        // 时间
         digitalTime:
-            duration + " 秒",
-
-        masa:
-            duration + " 秒",
+            duration +
+            " 秒",
 
 
-        /* Post-Test */
-
+        // Post-Test
         postL1:"",
         postL1TP:"",
 
@@ -1046,9 +1685,7 @@ async function sendDataToGoogleSheet(
     try{
 
         await fetch(
-
             GOOGLE_SHEET_WEBAPP_URL,
-
             {
 
                 method:"POST",
@@ -1057,7 +1694,7 @@ async function sendDataToGoogleSheet(
 
                 headers:{
                     "Content-Type":
-                    "text/plain;charset=utf-8"
+                        "text/plain;charset=UTF-8"
                 },
 
                 body:
@@ -1066,172 +1703,46 @@ async function sendDataToGoogleSheet(
                     )
 
             }
-
         );
 
 
-        return true;
+        status.className =
+            "success";
 
-    }catch(error){
+
+        status.innerText =
+            "✅ 成绩已发送到 Google Sheet";
+
+
+    }
+    catch(error){
 
         console.error(
             error
         );
 
-        return false;
+
+        status.className =
+            "fail";
+
+
+        status.innerText =
+            "⚠️ 发送失败，请检查网络连接。";
+
+
+    }
+
+    finally{
+
+        sending = false;
 
     }
 
 }
 
-
-/* =====================================================
-   最终报告
-===================================================== */
-
-async function showReport(){
-
-    endTime = new Date();
-
-
-    const duration =
-        Math.round(
-            (
-                endTime -
-                startTime
-            ) / 1000
-        );
-
-
-    const l1TP =
-        getTP3(
-            level1FirstCorrect
-        );
-
-
-    const l2TP =
-        getTP3(
-            level2FirstCorrect
-        );
-
-
-    const digitalTP3Count =
-        (
-            level1FirstCorrect >= 2
-            ? 1
-            : 0
-        )
-        +
-        (
-            level2FirstCorrect >= 2
-            ? 1
-            : 0
-        );
-
-
-    const report =
-        document
-        .getElementById(
-            "reportContent"
-        );
-
-
-    report.innerHTML = `
-
-        <div class="report-row">
-            <span>👤 学生姓名</span>
-            <strong>
-                ${student.name}
-            </strong>
-        </div>
-
-        <div class="report-row">
-            <span>🏫 班级</span>
-            <strong>
-                ${student.className}
-            </strong>
-        </div>
-
-        <div class="report-row">
-            <span>⏱ 答题时间</span>
-            <strong>
-                ${duration} 秒
-            </strong>
-        </div>
-
-        <div class="report-row">
-            <span>🟢 Level 1 首次答对</span>
-            <strong>
-                ${level1FirstCorrect}/5
-                → ${l1TP}
-            </strong>
-        </div>
-
-        <div class="report-row">
-            <span>🟡 Level 2 首次答对</span>
-            <strong>
-                ${level2FirstCorrect}/5
-                → ${l2TP}
-            </strong>
-        </div>
-
-        <div class="report-row">
-            <span>🏆 Digital TP3</span>
-            <strong>
-                ${digitalTP3Count}/2
-            </strong>
-        </div>
-
-        <div class="report-row">
-            <span>🤖 AI辅助次数</span>
-            <strong>
-                ${aiHelpCount} 次
-            </strong>
-        </div>
-
-        <div id="sheetStatus"
-             class="success">
-            📤 正在发送成绩到 Google Sheet...
-        </div>
-
-    `;
-
-
-    showScreen("report");
-
-
-    const sent =
-        await sendDataToGoogleSheet(
-            duration
-        );
-
-
-    const status =
-        document
-        .getElementById(
-            "sheetStatus"
-        );
-
-
-    if(sent){
-
-        status.innerText =
-            "✅ 成绩已发送到 Google Sheet";
-
-    }else{
-
-        status.innerText =
-            "⚠️ 发送失败，请检查网络";
-
-        status.classList.add(
-            "error"
-        );
-
-    }
-
-}
 
 </script>
 
 </body>
+
 </html>
